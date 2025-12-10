@@ -46,5 +46,48 @@ class TestMarketBasketGraph(unittest.TestCase):
         except TypeError:
             pass
 
+    def test_get_recommendations_logic(self):
+        """Test recommendation logic: items should be sorted by co-occurrence weight."""
+        # Prepare data
+        self.graph.add_transaction(['Milk', 'Bread'])
+        self.graph.add_transaction(['Milk', 'Bread'])
+        self.graph.add_transaction(['Milk', 'Apple'])
+        
+        recs = self.graph.get_recommendations('Milk')
+        
+        # Bread(2) , Apple(1) 
+        self.assertEqual(recs[0][0], 'Bread')
+        self.assertEqual(recs[0][1], 2)
+        self.assertEqual(recs[1][0], 'Apple')
+
+    def test_get_recommendations_edge_cases(self):
+        """Test recommendation edge cases: non-existent item, item with no connections."""
+        self.graph.add_transaction(['Milk', 'Bread'])
+        
+        # 1. querying a non-existent item
+        recs_unknown = self.graph.get_recommendations('Ferrari')
+        self.assertEqual(recs_unknown, [], "querying non-existent item should return empty list")
+        
+        # 2. querying an item with no connections
+        self.graph.add_transaction(['Water'])
+        recs_isolated = self.graph.get_recommendations('Water')
+        self.assertEqual(recs_isolated, [], "returning empty list for item with no connections")
+
+    def test_get_top_pairs_logic_and_edge_cases(self):
+        """test top pairs logic and edge cases."""
+        self.graph.add_transaction(['A', 'B']) 
+        self.graph.add_transaction(['A', 'B']) 
+        self.graph.add_transaction(['C', 'D']) 
+        
+        top_1 = self.graph.get_top_pairs(1)
+        self.assertEqual(len(top_1), 1)
+        self.assertEqual(top_1[0][1], 2) 
+        
+        # Edge Case: Requesting more pairs than exist
+        top_10 = self.graph.get_top_pairs(10)
+        
+        # returns only existing pairs
+        self.assertEqual(len(top_10), 2)
+
 if __name__ == '__main__':
     unittest.main()
