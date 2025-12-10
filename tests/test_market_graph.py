@@ -60,6 +60,7 @@ class TestMarketBasketGraph(unittest.TestCase):
         self.assertEqual(recs[0][1], 2)
         self.assertEqual(recs[1][0], 'Apple')
 
+
     def test_get_recommendations_edge_cases(self):
         """Test recommendation edge cases: non-existent item, item with no connections."""
         self.graph.add_transaction(['Milk', 'Bread'])
