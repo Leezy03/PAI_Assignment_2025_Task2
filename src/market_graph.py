@@ -59,3 +59,75 @@ class MarketBasketGraph:
             return 0
             
         return self.graph[item1][item2]
+
+    def get_recommendations(self, item):
+        """return items that co-occur with the given item, sorted by weight descending."""
+        if item not in self.graph:
+            return []
+
+        neighbors = self.graph[item]
+        if not neighbors:
+            return []
+
+        # revert to list of tuples for sorting
+        data_list = list(neighbors.items())
+
+        # Merge Sort
+        return self._merge_sort(data_list)
+
+    def get_top_pairs(self, n=3):
+        all_pairs = []
+        
+        nodes = list(self.graph.keys())
+        for item1 in nodes:
+            neighbors = self.graph[item1]
+            for item2, weight in neighbors.items():
+                if item1 < item2:
+                    all_pairs.append(((item1, item2), weight))
+
+        # Merge Sort
+        sorted_pairs = self._merge_sort(all_pairs)
+
+        return sorted_pairs[:n]
+
+    def _merge_sort(self, arr):
+        # Base case
+        if len(arr) <= 1:
+            return arr
+        
+        # Divide
+        mid = len(arr) // 2
+        left_half = arr[:mid]
+        right_half = arr[mid:]
+        
+        # Recursively sort
+        left_sorted = self._merge_sort(left_half)
+        right_sorted = self._merge_sort(right_half)
+        
+        # Merge
+        return self._merge(left_sorted, right_sorted)
+
+    def _merge(self, left, right):
+        """merge two sorted lists into one sorted list."""
+        result = []
+        i = j = 0
+        
+        while i < len(left) and j < len(right):
+            # sort by weight descending
+            if left[i][1] >= right[j][1]:
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+        
+        # Add remaining elements
+        while i < len(left):
+            result.append(left[i])
+            i += 1
+            
+        while j < len(right):
+            result.append(right[j])
+            j += 1
+            
+        return result
